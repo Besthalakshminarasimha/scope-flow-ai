@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search, Filter, Download, Eye, MoreVertical, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Filter, Download, Eye, MoreVertical, Calendar, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,58 +17,133 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase, AnalysisHistory } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const History = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [filterModel, setFilterModel] = useState("all");
+  const [analysisHistory, setAnalysisHistory] = useState<AnalysisHistory[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const analysisHistory = [
-    {
-      id: 1,
-      filename: "street_scene.jpg",
-      model: "Object Detection",
-      date: "2024-01-15 14:30",
-      confidence: 0.92,
-      objects: 12,
-      thumbnail: "/api/placeholder/100/100",
-    },
-    {
-      id: 2,
-      filename: "document_scan.png",
-      model: "OCR",
-      date: "2024-01-15 13:45",
-      confidence: 0.88,
-      words: 157,
-      thumbnail: "/api/placeholder/100/100",
-    },
-    {
-      id: 3,
-      filename: "group_photo.jpg",
-      model: "Face Recognition",
-      date: "2024-01-15 12:20",
-      confidence: 0.95,
-      faces: 5,
-      thumbnail: "/api/placeholder/100/100",
-    },
-    {
-      id: 4,
-      filename: "landscape.jpg",
-      model: "Image Classification",
-      date: "2024-01-15 11:15",
-      confidence: 0.87,
-      category: "Nature/Landscape",
-      thumbnail: "/api/placeholder/100/100",
-    },
-    {
-      id: 5,
-      filename: "medical_scan.jpg",
-      model: "Image Segmentation",
-      date: "2024-01-15 10:30",
-      confidence: 0.91,
-      segments: 8,
-      thumbnail: "/api/placeholder/100/100",
-    },
-  ];
+  useEffect(() => {
+    loadAnalysisHistory();
+  }, [user, filterModel]);
+
+  const loadAnalysisHistory = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('analysis_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (filterModel !== 'all') {
+        const modelMap: { [key: string]: string } = {
+          'object-detection': 'Object Detection',
+          'ocr': 'OCR',
+          'face-recognition': 'Face Recognition',
+          'classification': 'Image Classification',
+          'segmentation': 'Image Segmentation',
+        };
+        query = query.eq('model', modelMap[filterModel]);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setAnalysisHistory(data || []);
+    } catch (error) {
+      console.error('Error loading analysis history:', error);
+      toast({
+        title: "Error Loading History",
+        description: "Failed to load analysis history",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteAnalysis = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('analysis_history')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setAnalysisHistory(prev => prev.filter(item => item.id !== id));
+      toast({
+        title: "Analysis Deleted",
+        description: "Analysis has been removed from history",
+      });
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete analysis",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const exportAllResults = async () => {
+    try {
+      const dataStr = JSON.stringify(analysisHistory, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'visionx-analysis-history.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Export Complete",
+        description: "Analysis history exported successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export analysis history",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getResultsCount = (analysis: AnalysisHistory) => {
+    const results = analysis.results;
+    switch (analysis.model) {
+      case 'Object Detection':
+        return `${results?.objects?.length || 0} objects`;
+      case 'OCR':
+        return `${results?.words?.length || 0} words`;
+      case 'Face Recognition':
+        return `${results?.faces?.length || 0} faces`;
+      case 'Image Classification':
+        return `${results?.categories?.length || 0} categories`;
+      case 'Image Segmentation':
+        return `${results?.segments?.length || 0} segments`;
+      default:
+        return 'N/A';
+    }
+  };
+
+  const filteredHistory = analysisHistory.filter(item =>
+    item.filename.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    item.model.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const getModelColor = (model: string) => {
     const colors = {
@@ -93,7 +168,7 @@ const History = () => {
             View and manage your previous image analyses
           </p>
         </div>
-        <Button className="btn-primary">
+        <Button className="btn-primary" onClick={exportAllResults}>
           <Download className="w-4 h-4 mr-2" />
           Export All
         </Button>
@@ -137,8 +212,13 @@ const History = () => {
       </Card>
 
       {/* History Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {analysisHistory.map((item) => (
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredHistory.map((item) => (
           <Card key={item.id} className="glass hover:shadow-glow transition-all duration-300 cursor-pointer group">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
@@ -160,15 +240,30 @@ const History = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="glass">
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate(`/analysis/${item.id}`)}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => {
+                      const dataStr = JSON.stringify(item.results, null, 2);
+                      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                      const url = URL.createObjectURL(dataBlob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `${item.filename}-results.json`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
+                    }}>
                       <Download className="w-4 h-4 mr-2" />
                       Download Results
                     </DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">
+                    <DropdownMenuItem 
+                      className="text-destructive"
+                      onClick={() => deleteAnalysis(item.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
                       Delete Analysis
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -179,7 +274,7 @@ const History = () => {
               {/* Thumbnail */}
               <div className="relative rounded-lg overflow-hidden bg-background-tertiary h-32">
                 <img 
-                  src={item.thumbnail} 
+                  src={item.image_url} 
                   alt={item.filename}
                   className="w-full h-full object-cover"
                 />
@@ -200,55 +295,26 @@ const History = () => {
                   <span className="font-medium">{Math.round(item.confidence * 100)}%</span>
                 </div>
                 
-                {item.objects && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-foreground-muted">Objects Found</span>
-                    <span className="font-medium">{item.objects}</span>
-                  </div>
-                )}
-                
-                {item.words && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-foreground-muted">Words Extracted</span>
-                    <span className="font-medium">{item.words}</span>
-                  </div>
-                )}
-                
-                {item.faces && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-foreground-muted">Faces Detected</span>
-                    <span className="font-medium">{item.faces}</span>
-                  </div>
-                )}
-                
-                {item.category && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-foreground-muted">Category</span>
-                    <span className="font-medium">{item.category}</span>
-                  </div>
-                )}
-                
-                {item.segments && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-foreground-muted">Segments</span>
-                    <span className="font-medium">{item.segments}</span>
-                  </div>
-                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-foreground-muted">Results</span>
+                  <span className="font-medium">{getResultsCount(item)}</span>
+                </div>
 
                 <div className="pt-2 border-t border-border">
                   <div className="flex justify-between text-xs text-foreground-muted">
                     <span>Analyzed</span>
-                    <span>{item.date}</span>
+                    <span>{new Date(item.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Empty State */}
-      {analysisHistory.length === 0 && (
+      {!loading && filteredHistory.length === 0 && (
         <Card className="glass">
           <CardContent className="p-12 text-center">
             <div className="w-16 h-16 bg-gradient-upload rounded-full flex items-center justify-center mx-auto mb-4">
@@ -258,7 +324,7 @@ const History = () => {
             <p className="text-foreground-muted mb-6">
               Upload and analyze your first image to see results here
             </p>
-            <Button className="btn-primary">
+            <Button className="btn-primary" onClick={() => navigate('/')}>
               Start Analyzing
             </Button>
           </CardContent>

@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { Upload, Camera, Clipboard, Play, Download, Share, Settings2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Upload, Camera, Clipboard, Play, Download, Share, Settings2, Eye, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,23 +13,52 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { useImageProcessing, ProcessingResult } from "@/hooks/useImageProcessing";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { ResultsDisplay } from "@/components/ResultsDisplay";
 
 const Dashboard = () => {
-  const [selectedModel, setSelectedModel] = useState("object-detection");
+  const { user } = useAuth();
+  const { processImage, loading: processingLoading, result } = useImageProcessing();
+  const [selectedModel, setSelectedModel] = useState("Object Detection");
   const [confidence, setConfidence] = useState([0.7]);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [isDragging, setIsDragging] = useState(false);
+  const [recentAnalyses, setRecentAnalyses] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const models = [
-    { value: "object-detection", label: "Object Detection", description: "Identify and locate objects" },
-    { value: "image-classification", label: "Image Classification", description: "Categorize images" },
-    { value: "face-recognition", label: "Face Recognition", description: "Detect and recognize faces" },
-    { value: "ocr", label: "OCR (Text Extraction)", description: "Extract text from images" },
-    { value: "segmentation", label: "Image Segmentation", description: "Segment image regions" },
+    { value: "Object Detection", label: "Object Detection", description: "Identify and locate objects" },
+    { value: "Image Classification", label: "Image Classification", description: "Categorize images" },
+    { value: "Face Recognition", label: "Face Recognition", description: "Detect and recognize faces" },
+    { value: "OCR", label: "OCR (Text Extraction)", description: "Extract text from images" },
+    { value: "Image Segmentation", label: "Image Segmentation", description: "Segment image regions" },
   ];
+
+  useEffect(() => {
+    loadRecentAnalyses();
+  }, [user]);
+
+  const loadRecentAnalyses = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('analysis_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      setRecentAnalyses(data || []);
+    } catch (error) {
+      console.error('Error loading recent analyses:', error);
+    }
+  };
 
   const handleFileSelect = (file: File) => {
     setUploadedFile(file);
@@ -71,19 +100,52 @@ const Dashboard = () => {
     fileInputRef.current?.click();
   };
 
-  const handleProcess = () => {
+  const handleProcess = async () => {
     if (!uploadedFile) return;
     
-    setIsProcessing(true);
-    // Simulate processing
-    setTimeout(() => {
-      setIsProcessing(false);
-    }, 3000);
+    const result = await processImage(uploadedFile, selectedModel, confidence[0]);
+    if (result) {
+      loadRecentAnalyses(); // Refresh recent analyses
+    }
   };
 
-  const handleWebcamCapture = () => {
-    // Implement webcam capture
-    console.log("Webcam capture");
+  const handleWebcamCapture = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      
+      // Create video element and capture frame
+      const video = document.createElement('video');
+      video.srcObject = stream;
+      video.play();
+      
+      video.addEventListener('loadedmetadata', () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(video, 0, 0);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const file = new File([blob], 'webcam-capture.jpg', { type: 'image/jpeg' });
+            handleFileSelect(file);
+          }
+          stream.getTracks().forEach(track => track.stop());
+        }, 'image/jpeg');
+      });
+      
+      toast({
+        title: "Camera Accessed",
+        description: "Frame captured successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Camera Access Failed",
+        description: "Unable to access camera",
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePasteFromClipboard = async () => {
@@ -207,7 +269,7 @@ const Dashboard = () => {
                     alt="Preview" 
                     className="w-full h-auto max-h-96 object-contain"
                   />
-                  {isProcessing && (
+                  {processingLoading && (
                     <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
                       <div className="text-center space-y-4">
                         <div className="w-12 h-12 bg-gradient-primary rounded-full flex items-center justify-center mx-auto animate-pulse">
@@ -223,6 +285,11 @@ const Dashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          )}
+          
+          {/* Results Display */}
+          {result && (
+            <ResultsDisplay result={result} />
           )}
         </div>
 
@@ -274,10 +341,10 @@ const Dashboard = () => {
 
               <Button 
                 onClick={handleProcess}
-                disabled={!uploadedFile || isProcessing}
+                disabled={!uploadedFile || processingLoading}
                 className="w-full btn-primary mt-6"
               >
-                {isProcessing ? (
+                {processingLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
                     Processing...
@@ -299,20 +366,30 @@ const Dashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center space-x-3 p-3 rounded-lg bg-background-tertiary/50 hover:bg-background-tertiary transition-colors cursor-pointer">
-                    <div className="w-12 h-12 bg-gradient-upload rounded-md" />
+                {recentAnalyses.length > 0 ? recentAnalyses.map((analysis) => (
+                  <div key={analysis.id} className="flex items-center space-x-3 p-3 rounded-lg bg-background-tertiary/50 hover:bg-background-tertiary transition-colors cursor-pointer">
+                    <img 
+                      src={analysis.image_url} 
+                      alt={analysis.filename}
+                      className="w-12 h-12 object-cover rounded-md"
+                    />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">analysis_{i}.jpg</p>
+                      <p className="text-sm font-medium truncate">{analysis.filename}</p>
                       <div className="flex items-center space-x-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
-                          Object Detection
+                          {analysis.model}
                         </Badge>
-                        <span className="text-xs text-foreground-muted">5 min ago</span>
+                        <span className="text-xs text-foreground-muted">
+                          {new Date(analysis.created_at).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <p className="text-foreground-muted text-sm text-center py-4">
+                    No recent analyses
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -1,4 +1,4 @@
-import { Search, Settings, User, Bell, Moon, Sun } from "lucide-react";
+import { Search, Settings, User, Bell, Moon, Sun, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -12,14 +12,39 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "@/hooks/use-toast";
 
 export function Header() {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [isDark, setIsDark] = useState(true);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
     // Theme toggle logic would go here
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed Out",
+        description: "Successfully signed out of VisionX",
+      });
+      navigate('/welcome');
+    } catch (error) {
+      toast({
+        title: "Sign Out Failed",
+        description: "An error occurred while signing out",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getUserInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   return (
@@ -90,24 +115,30 @@ export function Header() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="btn-glass p-2">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src="/api/placeholder/32/32" alt="User" />
+                  <AvatarImage src={user?.user_metadata?.avatar_url} alt="User" />
                   <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                    <User className="w-4 h-4" />
+                    {getUserInitials(user?.user_metadata?.full_name || user?.email)}
                   </AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 glass">
-              <DropdownMenuItem onClick={() => navigate('/profile')}>
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </DropdownMenuItem>
+              <div className="px-2 py-1.5 text-sm">
+                <p className="font-medium">{user?.user_metadata?.full_name || 'User'}</p>
+                <p className="text-foreground-muted text-xs">{user?.email}</p>
+              </div>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => navigate('/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate('/about')}>
+                <User className="mr-2 h-4 w-4" />
+                About
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive">
+              <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+                <LogOut className="mr-2 h-4 w-4" />
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
