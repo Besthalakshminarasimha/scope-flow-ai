@@ -18,9 +18,20 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase, AnalysisHistory } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+
+interface AnalysisHistory {
+  id: string;
+  user_id: string;
+  filename: string;
+  model: string;
+  results: any;
+  confidence: number;
+  image_url: string;
+  created_at: string;
+}
 
 const History = () => {
   const { user } = useAuth();

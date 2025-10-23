@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -10,77 +10,6 @@ export interface ProcessingResult {
   processedImageUrl?: string;
 }
 
-// Mock AI processing functions (in a real app, these would call actual AI APIs)
-const processObjectDetection = (imageUrl: string): Promise<any> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        objects: [
-          { label: 'person', confidence: 0.95, bbox: [100, 50, 200, 300] },
-          { label: 'car', confidence: 0.87, bbox: [300, 150, 500, 250] },
-          { label: 'tree', confidence: 0.82, bbox: [50, 200, 150, 400] },
-        ],
-      });
-    }, 2000);
-  });
-};
-
-const processImageClassification = (imageUrl: string): Promise<any> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        categories: [
-          { label: 'outdoor scene', confidence: 0.89 },
-          { label: 'urban environment', confidence: 0.76 },
-          { label: 'daytime', confidence: 0.92 },
-        ],
-      });
-    }, 1500);
-  });
-};
-
-const processFaceRecognition = (imageUrl: string): Promise<any> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        faces: [
-          { confidence: 0.94, bbox: [120, 80, 180, 160], age: 28, gender: 'female' },
-          { confidence: 0.91, bbox: [250, 90, 310, 170], age: 35, gender: 'male' },
-        ],
-      });
-    }, 2500);
-  });
-};
-
-const processOCR = (imageUrl: string): Promise<any> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        text: "This is sample text extracted from the image using OCR technology. The confidence level varies by word.",
-        words: [
-          { text: 'This', confidence: 0.95, bbox: [10, 20, 40, 35] },
-          { text: 'is', confidence: 0.92, bbox: [45, 20, 60, 35] },
-          { text: 'sample', confidence: 0.88, bbox: [65, 20, 120, 35] },
-        ],
-      });
-    }, 1800);
-  });
-};
-
-const processImageSegmentation = (imageUrl: string): Promise<any> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        segments: [
-          { label: 'sky', pixels: 15420, color: '#87CEEB' },
-          { label: 'building', pixels: 23567, color: '#8B4513' },
-          { label: 'road', pixels: 12890, color: '#696969' },
-          { label: 'vegetation', pixels: 18234, color: '#228B22' },
-        ],
-      });
-    }, 3000);
-  });
-};
 
 export const useImageProcessing = () => {
   const [loading, setLoading] = useState(false);
@@ -115,34 +44,28 @@ export const useImageProcessing = () => {
         .from('images')
         .getPublicUrl(filePath);
 
-      // Process image based on selected model
-      let results;
-      let confidence = 0;
+      console.log('Calling AI analysis for:', model, publicUrl);
 
-      switch (model) {
-        case 'Object Detection':
-          results = await processObjectDetection(publicUrl);
-          confidence = Math.max(...results.objects.map((obj: any) => obj.confidence));
-          break;
-        case 'Image Classification':
-          results = await processImageClassification(publicUrl);
-          confidence = Math.max(...results.categories.map((cat: any) => cat.confidence));
-          break;
-        case 'Face Recognition':
-          results = await processFaceRecognition(publicUrl);
-          confidence = Math.max(...results.faces.map((face: any) => face.confidence));
-          break;
-        case 'OCR':
-          results = await processOCR(publicUrl);
-          confidence = Math.max(...results.words.map((word: any) => word.confidence));
-          break;
-        case 'Image Segmentation':
-          results = await processImageSegmentation(publicUrl);
-          confidence = 0.85; // Average confidence for segmentation
-          break;
-        default:
-          throw new Error('Invalid model selected');
+      // Call the edge function for real AI processing
+      const { data: aiData, error: aiError } = await supabase.functions.invoke('analyze-image', {
+        body: {
+          imageUrl: publicUrl,
+          model,
+          confidenceThreshold
+        }
+      });
+
+      if (aiError) {
+        console.error('AI processing error:', aiError);
+        throw new Error(aiError.message || 'Failed to process image with AI');
       }
+
+      if (!aiData || !aiData.results) {
+        throw new Error('Invalid response from AI processing');
+      }
+
+      const { results, confidence } = aiData;
+      console.log('AI analysis complete:', { model, confidence });
 
       // Save to history
       const { error: dbError } = await supabase
