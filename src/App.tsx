@@ -13,6 +13,13 @@ import History from "./pages/History";
 import Settings from "./pages/Settings";
 import About from "./pages/About";
 import AIMLProjects from "./pages/AIMLProjects";
+import ImageCaptionGenerator from "./pages/projects/ImageCaptionGenerator";
+import AIChatbot from "./pages/projects/AIChatbot";
+import FaceRecognitionAttendance from "./pages/projects/FaceRecognitionAttendance";
+import LanguageTranslator from "./pages/projects/LanguageTranslator";
+import VideoObjectDetection from "./pages/projects/VideoObjectDetection";
+import LaneLineDetection from "./pages/projects/LaneLineDetection";
+import SpeechEmotionRecognition from "./pages/projects/SpeechEmotionRecognition";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -60,6 +67,13 @@ const App = () => (
               <Route path="settings" element={<Settings />} />
               <Route path="about" element={<About />} />
               <Route path="aiml-projects" element={<AIMLProjects />} />
+              <Route path="projects/image-caption" element={<ImageCaptionGenerator />} />
+              <Route path="projects/ai-chatbot" element={<AIChatbot />} />
+              <Route path="projects/face-recognition" element={<FaceRecognitionAttendance />} />
+              <Route path="projects/translator" element={<LanguageTranslator />} />
+              <Route path="projects/video-detection" element={<VideoObjectDetection />} />
+              <Route path="projects/lane-detection" element={<LaneLineDetection />} />
+              <Route path="projects/speech-emotion" element={<SpeechEmotionRecognition />} />
             </Route>
             <Route path="/welcome" element={
               <PublicRoute>

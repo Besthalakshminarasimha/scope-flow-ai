@@ -1,43 +1,55 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { ExternalLink } from "lucide-react";
 
 const AIMLProjects = () => {
+  const navigate = useNavigate();
+
   const projects = [
     {
       name: "Image Caption Generator",
       domain: "Generative AI",
-      technologies: "Sequence-to-Sequence models, Combining CNNs (for image features) and RNNs/Transformers (for text generation)"
+      technologies: "Sequence-to-Sequence models, Combining CNNs (for image features) and RNNs/Transformers (for text generation)",
+      route: "/projects/image-caption"
     },
     {
       name: "AI Chatbot/Conversational Agent (using RAG)",
       domain: "Generative AI",
-      technologies: "Transformer models (BERT/GPT), Retrieval-Augmented Generation (RAG), Fine-tuning LLMs"
+      technologies: "Transformer models (BERT/GPT), Retrieval-Augmented Generation (RAG), Fine-tuning LLMs",
+      route: "/projects/ai-chatbot"
     },
     {
       name: "Automated Attendance System (Face Recognition)",
       domain: "Computer Vision",
-      technologies: "Real-time Object Detection/Recognition (e.g., using YOLO or SSD), Deep Learning for identity verification"
+      technologies: "Real-time Object Detection/Recognition (e.g., using YOLO or SSD), Deep Learning for identity verification",
+      route: "/projects/face-recognition"
     },
     {
       name: "Object Detection in Videos",
       domain: "Computer Vision",
-      technologies: "Real-time inference, Tracking algorithms, Deep Learning models (YOLO, Faster R-CNN)"
+      technologies: "Real-time inference, Tracking algorithms, Deep Learning models (YOLO, Faster R-CNN)",
+      route: "/projects/video-detection"
     },
     {
       name: "Autonomous Vehicle Simulation (Lane Line Detection)",
       domain: "Robotics/Control",
-      technologies: "Computer Vision, Sensor Fusion concepts, Path Planning, Reinforcement Learning (advanced)"
+      technologies: "Computer Vision, Sensor Fusion concepts, Path Planning, Reinforcement Learning (advanced)",
+      route: "/projects/lane-detection"
     },
     {
       name: "Language Translator App (using a Transformer)",
       domain: "NLP",
-      technologies: "Advanced Transformer Architectures, Neural Machine Translation"
+      technologies: "Advanced Transformer Architectures, Neural Machine Translation",
+      route: "/projects/translator"
     },
     {
       name: "Speech Emotion Recognition",
       domain: "Audio/Speech",
-      technologies: "Signal Processing, Deep Learning (e.g., CNN or RNN) on audio features (Spectrograms)"
+      technologies: "Signal Processing, Deep Learning (e.g., CNN or RNN) on audio features (Spectrograms)",
+      route: "/projects/speech-emotion"
     }
   ];
 
@@ -77,9 +89,10 @@ const AIMLProjects = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead className="font-semibold text-foreground w-[30%]">Project Name</TableHead>
-                  <TableHead className="font-semibold text-foreground w-[20%]">Domain</TableHead>
-                  <TableHead className="font-semibold text-foreground w-[50%]">Key Technologies & Concepts</TableHead>
+                  <TableHead className="font-semibold text-foreground w-[25%]">Project Name</TableHead>
+                  <TableHead className="font-semibold text-foreground w-[18%]">Domain</TableHead>
+                  <TableHead className="font-semibold text-foreground w-[45%]">Key Technologies & Concepts</TableHead>
+                  <TableHead className="font-semibold text-foreground w-[12%]">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -101,6 +114,16 @@ const AIMLProjects = () => {
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {project.technologies}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => navigate(project.route)}
+                        className="gap-2"
+                      >
+                        Try It <ExternalLink className="w-3 h-3" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -2,3 +2,18 @@ project_id = "tlomwqgamhhogfpdirvm"
 
 [functions.analyze-image]
 verify_jwt = true
+
+[functions.generate-caption]
+verify_jwt = true
+
+[functions.chat]
+verify_jwt = false
+
+[functions.translate]
+verify_jwt = true
+
+[functions.detect-lanes]
+verify_jwt = true
+
+[functions.analyze-emotion]
+verify_jwt = true
