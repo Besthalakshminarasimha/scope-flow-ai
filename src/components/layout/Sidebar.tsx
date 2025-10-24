@@ -13,7 +13,8 @@ import {
   Activity,
   ChevronRight,
   Home,
-  Info
+  Info,
+  Sparkles
 } from "lucide-react";
 import {
   Sidebar as SidebarRoot,
@@ -34,6 +35,7 @@ const navigationItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Upload", url: "/upload", icon: Upload },
   { title: "History", url: "/history", icon: History },
+  { title: "Explore AI/ML Projects", url: "/aiml-projects", icon: Sparkles },
 ];
 
 const modelItems = [

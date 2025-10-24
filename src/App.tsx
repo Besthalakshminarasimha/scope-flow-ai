@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
 import About from "./pages/About";
+import AIMLProjects from "./pages/AIMLProjects";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="history" element={<History />} />
               <Route path="settings" element={<Settings />} />
               <Route path="about" element={<About />} />
+              <Route path="aiml-projects" element={<AIMLProjects />} />
             </Route>
             <Route path="/welcome" element={
               <PublicRoute>
