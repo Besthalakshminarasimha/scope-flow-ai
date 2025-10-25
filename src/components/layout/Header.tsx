@@ -1,4 +1,4 @@
-import { Search, Settings, User, Bell, Moon, Sun, LogOut } from "lucide-react";
+import { Search, Settings, User, Bell, Moon, Sun, LogOut, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
@@ -8,22 +8,77 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator 
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export function Header() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const [isDark, setIsDark] = useState(true);
+  const [isDark, setIsDark] = useState(() => {
+    return document.documentElement.classList.contains('dark');
+  });
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      title: "Image Analysis Complete",
+      description: "Your lane detection analysis has finished processing",
+      time: "2 min ago",
+      read: false,
+    },
+    {
+      id: 2,
+      title: "New Feature Available",
+      description: "Speech emotion recognition is now available",
+      time: "1 hour ago",
+      read: false,
+    },
+    {
+      id: 3,
+      title: "System Update",
+      description: "VisionX has been updated to version 2.0",
+      time: "3 hours ago",
+      read: true,
+    },
+  ]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (isDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+  }, [isDark]);
 
   const toggleTheme = () => {
     setIsDark(!isDark);
-    // Theme toggle logic would go here
   };
+
+  const markAsRead = (id: number) => {
+    setNotifications(prev =>
+      prev.map(notif =>
+        notif.id === id ? { ...notif, read: true } : notif
+      )
+    );
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev =>
+      prev.map(notif => ({ ...notif, read: true }))
+    );
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleSignOut = async () => {
     try {
@@ -89,16 +144,72 @@ export function Header() {
           </Button>
 
           {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="btn-glass w-10 h-10 relative"
-          >
-            <Bell className="w-4 h-4" />
-            <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center bg-gradient-primary text-xs">
-              3
-            </Badge>
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="btn-glass w-10 h-10 relative"
+              >
+                <Bell className="w-4 h-4" />
+                {unreadCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center bg-gradient-primary text-xs">
+                    {unreadCount}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 glass p-0" align="end">
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <h3 className="font-semibold">Notifications</h3>
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={markAllAsRead}
+                    className="text-xs h-auto p-1 px-2"
+                  >
+                    Mark all read
+                  </Button>
+                )}
+              </div>
+              <ScrollArea className="h-[300px]">
+                {notifications.length === 0 ? (
+                  <div className="p-8 text-center text-foreground-muted">
+                    <Bell className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>No notifications</p>
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`p-4 hover:bg-background-tertiary/50 cursor-pointer transition-colors ${
+                          !notification.read ? 'bg-background-tertiary/30' : ''
+                        }`}
+                        onClick={() => markAsRead(notification.id)}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 space-y-1">
+                            <p className="font-medium text-sm">{notification.title}</p>
+                            <p className="text-xs text-foreground-muted">
+                              {notification.description}
+                            </p>
+                            <p className="text-xs text-foreground-muted/70">
+                              {notification.time}
+                            </p>
+                          </div>
+                          {!notification.read && (
+                            <div className="w-2 h-2 rounded-full bg-primary flex-shrink-0 mt-1" />
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </ScrollArea>
+            </PopoverContent>
+          </Popover>
 
           {/* Settings */}
           <Button
