@@ -101,11 +101,24 @@ const AIChatbot = () => {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8 animate-fade-in">
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">AI Chatbot with RAG</h1>
-        <p className="text-lg text-muted-foreground">
-          Conversational AI powered by advanced language models with retrieval-augmented generation.
+      <div className="space-y-6">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-2">
+          <Bot className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-primary">Generative AI · RAG-Enhanced LLM</span>
+        </div>
+        <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+          AI Chatbot with RAG
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-3xl">
+          Engage with next-generation conversational AI powered by Retrieval-Augmented Generation. 
+          This intelligent assistant combines the reasoning power of large language models with real-time 
+          knowledge retrieval for accurate, contextually aware responses that stream in real-time.
         </p>
+        <div className="flex flex-wrap gap-2">
+          <div className="px-3 py-1 rounded-full bg-muted text-sm">Streaming Responses</div>
+          <div className="px-3 py-1 rounded-full bg-muted text-sm">Context Retention</div>
+          <div className="px-3 py-1 rounded-full bg-muted text-sm">RAG Architecture</div>
+        </div>
       </div>
 
       <Card className="h-[600px] flex flex-col">

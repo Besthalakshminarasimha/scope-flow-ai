@@ -70,11 +70,24 @@ const ImageCaptionGenerator = () => {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8 animate-fade-in">
-      <div className="space-y-4">
-        <h1 className="text-4xl font-bold tracking-tight">Image Caption Generator</h1>
-        <p className="text-lg text-muted-foreground">
-          Upload an image and let AI generate a descriptive caption using advanced vision models.
+      <div className="space-y-6">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-2">
+          <ImageIcon className="w-4 h-4 text-primary" />
+          <span className="text-sm font-medium text-primary">Generative AI · Vision-Language Model</span>
+        </div>
+        <h1 className="text-5xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+          Image Caption Generator
+        </h1>
+        <p className="text-xl text-muted-foreground max-w-3xl">
+          Experience the power of neural vision-language models that understand and describe visual content. 
+          Our advanced AI combines Convolutional Neural Networks for image feature extraction with Transformer-based 
+          language models to generate contextually accurate, human-like captions in real-time.
         </p>
+        <div className="flex flex-wrap gap-2">
+          <div className="px-3 py-1 rounded-full bg-muted text-sm">Real-time Analysis</div>
+          <div className="px-3 py-1 rounded-full bg-muted text-sm">Sequence-to-Sequence</div>
+          <div className="px-3 py-1 rounded-full bg-muted text-sm">CNN + Transformer</div>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
