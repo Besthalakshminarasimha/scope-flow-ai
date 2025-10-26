@@ -224,6 +224,36 @@ const About = () => {
           </p>
         </CardContent>
       </Card>
+
+      {/* Creator Section */}
+      <Card className="glass border-primary/20">
+        <CardContent className="p-8">
+          <div className="text-center space-y-6">
+            <div className="w-16 h-16 bg-gradient-primary rounded-full mx-auto flex items-center justify-center">
+              <Users className="w-8 h-8 text-primary-foreground" />
+            </div>
+            <div className="space-y-3">
+              <h3 className="text-2xl font-bold bg-gradient-brand bg-clip-text text-transparent">
+                Built by Innovation
+              </h3>
+              <div className="space-y-2">
+                <p className="text-lg font-semibold text-foreground">
+                  Bestha Lakshminarasimha
+                </p>
+                <Badge variant="outline" className="text-sm">
+                  AI/ML Student & Developer
+                </Badge>
+              </div>
+              <p className="text-foreground-muted leading-relaxed max-w-2xl mx-auto">
+                VisionX is the culmination of passion for artificial intelligence and computer vision. 
+                Built with dedication to exploring the frontiers of machine learning, this platform 
+                represents the intersection of academic excellence and practical innovation in the field 
+                of AI and computer vision technologies.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
