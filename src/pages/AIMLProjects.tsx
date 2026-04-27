@@ -89,7 +89,8 @@ const AIMLProjects = () => {
       "Computer Vision": "bg-secondary/10 text-secondary-foreground border-secondary/20",
       "Robotics/Control": "bg-accent/10 text-accent-foreground border-accent/20",
       "NLP": "bg-muted text-muted-foreground border-muted-foreground/20",
-      "Audio/Speech": "bg-primary/5 text-primary border-primary/10"
+      "Audio/Speech": "bg-primary/5 text-primary border-primary/10",
+      "Spatial Computing": "bg-accent/15 text-accent-foreground border-accent/30"
     };
     return colors[domain] || "bg-muted text-muted-foreground";
   };
