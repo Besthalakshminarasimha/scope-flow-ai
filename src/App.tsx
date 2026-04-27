@@ -75,6 +75,7 @@ const App = () => (
               <Route path="projects/video-detection" element={<VideoObjectDetection />} />
               <Route path="projects/lane-detection" element={<LaneLineDetection />} />
               <Route path="projects/speech-emotion" element={<SpeechEmotionRecognition />} />
+              <Route path="projects/gaussian-splatting" element={<GaussianSplatting />} />
             </Route>
             <Route path="/welcome" element={
               <PublicRoute>
