@@ -180,8 +180,8 @@ const AIMLProjects = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {["Generative AI", "Computer Vision", "NLP", "Robotics/Control", "Audio/Speech"].map((domain) => (
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            {["Generative AI", "Computer Vision", "NLP", "Robotics/Control", "Audio/Speech", "Spatial Computing"].map((domain) => (
               <div key={domain} className="text-center space-y-2">
                 <Badge className={`${getDomainColor(domain)} w-full justify-center py-2`}>
                   {domain}
