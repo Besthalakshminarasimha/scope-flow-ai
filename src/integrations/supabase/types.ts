@@ -47,6 +47,104 @@ export type Database = {
         }
         Relationships: []
       }
+      reconstruction_jobs: {
+        Row: {
+          created_at: string
+          error: string | null
+          external_job_id: string | null
+          id: string
+          message: string | null
+          progress: number
+          scene_id: string | null
+          source_files: Json
+          source_type: string
+          stage: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          external_job_id?: string | null
+          id?: string
+          message?: string | null
+          progress?: number
+          scene_id?: string | null
+          source_files?: Json
+          source_type?: string
+          stage?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          external_job_id?: string | null
+          id?: string
+          message?: string | null
+          progress?: number
+          scene_id?: string | null
+          source_files?: Json
+          source_type?: string
+          stage?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reconstruction_jobs_scene_id_fkey"
+            columns: ["scene_id"]
+            isOneToOne: false
+            referencedRelation: "scenes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scenes: {
+        Row: {
+          config: Json
+          created_at: string
+          description: string | null
+          file_path: string | null
+          format: string
+          id: string
+          is_public: boolean
+          name: string
+          point_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          file_path?: string | null
+          format?: string
+          id?: string
+          is_public?: boolean
+          name: string
+          point_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          description?: string | null
+          file_path?: string | null
+          format?: string
+          id?: string
+          is_public?: boolean
+          name?: string
+          point_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
