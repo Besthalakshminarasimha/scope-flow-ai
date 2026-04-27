@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink, Brain, Eye, MessageSquare, Languages, Video, Car, Mic } from "lucide-react";
+import { ExternalLink, Brain, Eye, MessageSquare, Languages, Video, Car, Mic, Boxes } from "lucide-react";
 
 const AIMLProjects = () => {
   const navigate = useNavigate();
