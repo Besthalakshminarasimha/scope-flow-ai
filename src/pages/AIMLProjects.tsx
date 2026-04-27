@@ -71,6 +71,15 @@ const AIMLProjects = () => {
       icon: Mic,
       features: ["Real-time emotion detection", "Multi-emotion classification", "Confidence scoring"],
       route: "/projects/speech-emotion"
+    },
+    {
+      name: "Real-Time 3D Scene Reconstruction (3DGS)",
+      domain: "Spatial Computing",
+      technologies: "3D Gaussian Splatting, COLMAP (SfM), CUDA tile-based rasterization, Spherical Harmonics, Differentiable Rendering",
+      description: "Move beyond 2D vision into volumetric scene understanding. Reconstruct photorealistic 3D environments from video using millions of anisotropic 3D Gaussians, with real-time rendering at 30+ FPS — the bleeding edge of spatial AI.",
+      icon: Boxes,
+      features: ["Real-time volumetric rendering", "Interactive scene navigation", "Adaptive density control"],
+      route: "/projects/gaussian-splatting"
     }
   ];
 
