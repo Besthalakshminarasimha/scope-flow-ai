@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ExternalLink, Brain, Eye, MessageSquare, Languages, Video, Car, Mic } from "lucide-react";
+import { ExternalLink, Brain, Eye, MessageSquare, Languages, Video, Car, Mic, Boxes } from "lucide-react";
 
 const AIMLProjects = () => {
   const navigate = useNavigate();
@@ -71,6 +71,15 @@ const AIMLProjects = () => {
       icon: Mic,
       features: ["Real-time emotion detection", "Multi-emotion classification", "Confidence scoring"],
       route: "/projects/speech-emotion"
+    },
+    {
+      name: "Real-Time 3D Scene Reconstruction (3DGS)",
+      domain: "Spatial Computing",
+      technologies: "3D Gaussian Splatting, COLMAP (SfM), CUDA tile-based rasterization, Spherical Harmonics, Differentiable Rendering",
+      description: "Move beyond 2D vision into volumetric scene understanding. Reconstruct photorealistic 3D environments from video using millions of anisotropic 3D Gaussians, with real-time rendering at 30+ FPS — the bleeding edge of spatial AI.",
+      icon: Boxes,
+      features: ["Real-time volumetric rendering", "Interactive scene navigation", "Adaptive density control"],
+      route: "/projects/gaussian-splatting"
     }
   ];
 
@@ -80,7 +89,8 @@ const AIMLProjects = () => {
       "Computer Vision": "bg-secondary/10 text-secondary-foreground border-secondary/20",
       "Robotics/Control": "bg-accent/10 text-accent-foreground border-accent/20",
       "NLP": "bg-muted text-muted-foreground border-muted-foreground/20",
-      "Audio/Speech": "bg-primary/5 text-primary border-primary/10"
+      "Audio/Speech": "bg-primary/5 text-primary border-primary/10",
+      "Spatial Computing": "bg-accent/15 text-accent-foreground border-accent/30"
     };
     return colors[domain] || "bg-muted text-muted-foreground";
   };
@@ -170,8 +180,8 @@ const AIMLProjects = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-            {["Generative AI", "Computer Vision", "NLP", "Robotics/Control", "Audio/Speech"].map((domain) => (
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            {["Generative AI", "Computer Vision", "NLP", "Robotics/Control", "Audio/Speech", "Spatial Computing"].map((domain) => (
               <div key={domain} className="text-center space-y-2">
                 <Badge className={`${getDomainColor(domain)} w-full justify-center py-2`}>
                   {domain}
