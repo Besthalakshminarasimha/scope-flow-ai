@@ -82,6 +82,7 @@ const App = () => (
                 <Welcome />
               </PublicRoute>
             } />
+            <Route path="/scene/:sceneId" element={<GaussianSplatting />} />
             <Route path="/login" element={
               <PublicRoute>
                 <Login />
