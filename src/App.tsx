@@ -20,6 +20,7 @@ import LanguageTranslator from "./pages/projects/LanguageTranslator";
 import VideoObjectDetection from "./pages/projects/VideoObjectDetection";
 import LaneLineDetection from "./pages/projects/LaneLineDetection";
 import SpeechEmotionRecognition from "./pages/projects/SpeechEmotionRecognition";
+import GaussianSplatting from "./pages/projects/GaussianSplatting";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
